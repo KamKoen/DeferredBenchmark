@@ -15,14 +15,16 @@ ______________
 --------------
    |
    --DeferredBench.jar
-   |  ___________
-   --|lwjgl-2.9.1|
-     ------------
-        |  __________
-        --|all_native|
-          -----------
-              |
-              --natives for all platforms can be found here
+   |  ___
+   --|lib|
+     -----
+     	|--|lwjgl-2.9.1|
+    	   ------------
+        	|  __________
+       		 --|all_native|
+        	  -----------
+         		     |
+         		     --natives for all platforms can be found here
               
 This repository provides a folder with the required natives and folder structure, so downloading the release version should be enough.
 
