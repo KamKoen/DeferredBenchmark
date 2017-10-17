@@ -13,9 +13,10 @@ The .jar file can be executed as long as the natives can be found in a folder ne
 
 * Random Folder
   * DeferredBenchmark.jar
-  * lwjgl-2.9.1
-    * all_native
-      * natives for all platforms should be here
+  * lib
+    * lwjgl-2.9.1
+      * all_native
+        * natives for all platforms should be here
               
 This repository provides a folder with the required natives and folder structure, so downloading the release version should be enough.
 
