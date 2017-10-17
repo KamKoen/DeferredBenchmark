@@ -2,7 +2,7 @@
 For licenses and sources in regards to the used libraries and models, one should take a look at Licenses.txt.
 
 This benchmark program was created for my bachelor's thesis "Vergleich zwischen Deferred and Forward Rendering" 
-(transl.: "Comparison between Deferred and Forward Rendering"). After starting the program and letting it load to 
+(transl.: "Comparison between Deferred and Forward Rendering", [link to the pdf in German](http://www.gdv.informatik.uni-frankfurt.de/abschlussarbeiten/download/2014-4/ausarbeitung.pdf)). After starting the program and letting it load to 
 completion, the user is greeted with a Swing-UI holding a panel which uses LWJGL to render a scene of 3D-models. 
 The only requirement should be a graphics card that can handle multiple FBOs and GL4.3, since LWJGL should work
 regardless of operating system.
@@ -97,7 +97,7 @@ The following options are available:
 		model fragments to the fragment shader, we can calculate per fragment the effect the light has on that particular
 		fragment, and thus reduce the number of lights we have to take into consideration per each fragment on the screen.
 		
-* Deferred-Stencil (see Yuriy O'Donnell's post (http://kayru.org/articles/deferred-stencil/) on this 
+* Deferred-Stencil (see [Yuriy O'Donnell's post](http://kayru.org/articles/deferred-stencil/) on this 
 					from which this algorithm is taken/adapted
 	* The first pass sends objects and saves information. The second pass sends for each light
 		a representative sphere which saves in the stencil-buffer the information of whether or
