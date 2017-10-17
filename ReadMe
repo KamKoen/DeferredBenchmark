@@ -91,7 +91,16 @@ The following options are available:
 		
 	Deferred-Rendering
 		The first pass sends objects and saves information for the lighting (normal, albedo, depth),
-		the second pass constructs the scene based on the saved information.
+		the second pass constructs the scene based on the saved information and the lights in the 
+		scene. In this case, each fragment/pixel on the screen takes every light into account and 
+		calculates, whether the distance is inside the light's effective region, and what effect the
+		light has on the color.
+	
+	Deferred-Sphere
+		The first pass sends objects and saves information. The second pass sends for each light a representative
+		sphere model with the radius being as large as the light's effective region. Since we are sending per sphere
+		model fragments to the fragment shader, we can calculate per fragment the effect the light has on that particular
+		fragment, and thus reduce the number of lights we have to take into consideration per each fragment on the screen.
 		
 	Deferred-Stencil (see Yuriy O'Donnell's post (http://kayru.org/articles/deferred-stencil/) on this 
 					from which this algorithm is taken/adapted 		
@@ -99,7 +108,7 @@ The following options are available:
 		a representative sphere which saves in the stencil-buffer the information of whether or
 		not the light affects the sent fragment (since it could either be covered by a scene
 		object or not hit any object at all (dangling light in empty space)). Any fragment that
-		passes the stencil test calculates the respective light's effect on the fragment.
+		passes the stencil test in a third pass calculates the respective light's effect on the fragment.
 		
 	Tiled-Deferred (see Johan Andersson (DICE), GDC 2011)
 		By using a compute shader, we can divide the screen into tiles and can calculate which lights 
