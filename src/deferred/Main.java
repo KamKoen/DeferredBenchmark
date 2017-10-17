@@ -3595,8 +3595,6 @@ public class Main extends JFrame{
 			public void run()
 			{
 			
-
-		         
 		        
 				loadingDialog.setVisible(true);
 		        
