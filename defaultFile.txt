@@ -1,0 +1,568 @@
+Lightstats: 
+ConstAtten: 0.0 LinearAtten: 0.0 QuadAtten: 0.005 Prozent: 200.0 Radius: 200.0
+Spherecount: 1000SpherePlacement: Random
+Lightcount: 200 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 0.0 LinearAtten: 0.0 QuadAtten: 0.005 Prozent: 200.0 Radius: 200.0
+Spherecount: 200SpherePlacement: Random
+Lightcount: 1024 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+RADIUS-Test_________Spheres fixed at 500_____Lights fixed at 500
+
+____________________________________________________________________________________
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.0796 Prozent: 200.0 Radius: 50.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+DefSphereStencil|1.91		|47.46		|8.19		|8.46
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.0199 Prozent: 200.0 Radius: 100.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+DefSphereStencil|2.33		|16.57		|8.79		|9.52
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+DefSphereStencil|9.65		|35.38		|22.37		|21.25
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.0016244898 Prozent: 200.0 Radius: 350.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+DefSphereStencil|28.3		|66.69		|54.8		|56.41
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 7.96E-4 Prozent: 200.0 Radius: 500.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+SPHERE-Test_________Radius fixed at 200_____Lights fixed at 500
+
+____________________________________________________________________________________
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 0SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 50SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 100SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 200SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 750SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 1000SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+LIGHT-Test_________Radius fixed at 200_____Spheres fixed at 500
+
+____________________________________________________________________________________
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 0 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 10 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 20 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 50 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 100 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 200 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 500 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 750 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+Lightstats: 
+ConstAtten: 1.0 LinearAtten: 0.0 QuadAtten: 0.004975 Prozent: 200.0 Radius: 200.0
+Spherecount: 500SpherePlacement: Random
+Lightcount: 1024 	LightPlacement: Random
+Algorithmus	|Mil.Sec. - Min	|Mil.Sec. - Max	|Mil.Sec. - Mean	|Mil.Sec. - Median
+___________________________________________________________________________________________________________________
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
+
+
+
+___________________________________________________
+
+
