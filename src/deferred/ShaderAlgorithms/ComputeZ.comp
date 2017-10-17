@@ -1,0 +1,122 @@
+
+
+layout(std430, binding = 1)  buffer zBuf
+{
+	float zB[]; //min max
+};
+
+uniform sampler2D depthTex;
+
+uniform int width;
+uniform int height;
+
+uniform int tileWidth;
+uniform int tileHeight;
+
+uniform float C;
+uniform float D;
+
+
+
+
+
+layout(local_size_x = TWIDTH,local_size_y = THEIGHT,local_size_z = 1) in; 
+
+
+//da atomic ops nur mit ints funktionieren
+//muss hier mit ints hantiert werden, bzw.
+//müssen auch die floats in int gecastet werden damit
+//der shader funktioniert
+
+
+shared uint minZ; 	
+shared uint maxZ;		
+void main()
+{
+	atomicExchange(minZ, 0xFFFFFFFF);
+	atomicExchange(maxZ, 0);
+	barrier();
+		
+	float xCoord = gl_WorkGroupID.x * tileWidth + gl_LocalInvocationID.x;
+	float yCoord = gl_WorkGroupID.y * tileHeight + gl_LocalInvocationID.y;
+	
+	//die 0.5 sind hier wegen sonst Auftauchenden Artefakten wegen Fehlern beim Tiefensampling,
+	//da die Fragmentkoordinaten den Pixel-Mittelpunkt beschreiben, nicht den 
+	//Pixel (d.h. untere linkester Pixel hat die Koord. (0.5,0.5), und nicht (0,0)
+	
+	xCoord = (xCoord+0.5) / width;
+	yCoord = (yCoord+0.5) / height;
+	
+	float z = texture2D(depthTex, vec2(xCoord,yCoord)).x;
+	
+	
+	
+	//Casten der Floats zu uInts, bzw. deren Bit-Repräsentation wird als
+	//uint gespeichert
+	//da hier keine Minuswerte in der Tiefe vorkommen, ist beim Float der erste Bit
+	//immer eine 0, weswegen Vergleichsoperationen immer noch funktionieren
+        //wenn man mit den so erstellten uints hantiert
+
+	uint zI = floatBitsToUint(z);
+	
+	atomicMin(minZ, zI);
+	
+	barrier(); //für die Synchro ist der Barrier auch hier nötig,
+				//aus irgendeinem Grund reicht 
+				//der untere barrier() alleine nicht aus
+				//da sonst die Werte nicht richtig abgespeichert werden
+				//und Lichter fälschlicherweise wegen falscher
+				//min/max Werten verschwinden
+				
+	atomicMax(maxZ, zI);
+	
+	barrier(); //für die Synchro
+	
+	
+	//zurück in float bringen
+
+	float zMin = uintBitsToFloat(minZ);
+	float zMax = uintBitsToFloat(maxZ);
+	
+
+	//die Tiefenwerte die später benutzt werden sollten im
+	//view-space sein, daher wird hier mit C und D gerechnet
+	//(C und D sind die Zahlen, die in der Perspektiv-Matr.
+	//in der dritten Zeile, dritte und vierte Spalte sind, also die Werte,
+	//die den Z-Wert beeinflussen)
+	//Was hier also gleich passiert ist einfach die Rechnung die bei
+	//einer Multiplikation des window-space-coords mit der invertierten
+	//Projektionsmatrix passieren würde
+	
+	int curx = int(gl_WorkGroupID.x);
+	int cury = int(gl_WorkGroupID.y);
+	
+	//offset im SSBO	
+	int offset = cury*(width/tileWidth) * 2 + curx * 2;
+	
+	
+	//window-space-Z zu ndc-Z
+	float nDcz = zMin * 2.0 - 1.0;
+	
+	
+	//ndc zu view-space
+	float retZ = -D / (nDcz + C);
+	
+	//im SSBO abspeichern
+	zB[offset] = retZ;
+	
+	
+	//das gleiche nochmal, nur mit dem max-wert
+	
+	nDcz = zMax * 2.0 - 1.0;
+	
+	retZ = -D / (nDcz + C);
+	
+	zB[offset+1] = retZ;
+	
+	
+	
+	
+	
+}
+
