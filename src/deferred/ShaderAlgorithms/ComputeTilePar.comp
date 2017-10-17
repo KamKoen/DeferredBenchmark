@@ -2,8 +2,8 @@
 
 
 //
-//Der Shader hier ist sehr groß, weil hier alle möglichen Unterteilungen beachtet werden, 
-//und da immer mit anderen Werten gerechnet werden muss, müsste man entweder mehrere
+//Der Shader hier ist sehr groï¿½, weil hier alle mï¿½glichen Unterteilungen beachtet werden, 
+//und da immer mit anderen Werten gerechnet werden muss, mï¿½sste man entweder mehrere
 //Shader schreiben, oder mit if Abfragen arbeiten
 //
 //
@@ -893,7 +893,7 @@ void createFrustumForTileFromSub1()
 	
 	//what tile
 	
-	int curySub = int((y2) / tileHeightSub); //IDFK WHY
+	int curySub = int((y2) / tileHeightSub); 
 	int curxSub = int((x2) / tileWidthSub);
 	
 	int offsetSub = infoSub[(curxSub + curySub * (width / tileWidthSub)) * 2];
