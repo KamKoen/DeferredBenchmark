@@ -3485,6 +3485,8 @@ public class Main extends JFrame{
 	public void initGL()
 	{
 		
+		
+		
 		int a = 0;
 		System.out.println(GL11.glGetInteger( GL_MAX_FRAGMENT_UNIFORM_COMPONENTS));
 		
@@ -3572,9 +3574,48 @@ public class Main extends JFrame{
 		createRenderingFBO();
 		
 		
+		
+		
+		final JOptionPane loadingPopupPane = new JOptionPane(null,
+                JOptionPane.INFORMATION_MESSAGE,
+                JOptionPane.DEFAULT_OPTION,
+                null,
+                new Object[]{},
+                null);
+		final JDialog loadingDialog = new JDialog();
+		loadingDialog.setTitle("Loading...");
+		loadingDialog.setModal(false);
+		loadingDialog.setContentPane(loadingPopupPane);
+		loadingDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		loadingDialog.pack();
+		
+		Thread loadingPopup = new Thread()
+		{
+			
+			public void run()
+			{
+			
+
+		         
+		        
+				loadingDialog.setVisible(true);
+		        
+		        
+			}
+					
+		};	
+		
+		loadingPopup.start();
 		//Alle Modelle/Objekte vorbereiten
 		setUpModelsAndObjects();
-		
+		try {
+			loadingDialog.setVisible(false);
+			loadingPopup.join();
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		//Shader für String-Darstellung als weiße Pixel vorbereiten
         displayStringShader = new ShaderProgram();
