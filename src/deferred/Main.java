@@ -56,6 +56,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -2776,6 +2777,79 @@ public class Main extends JFrame{
 		setVisible(true);
 	}
 	
+	
+public class LoadingSwingWorker extends SwingWorker<Integer, String> {
+
+		
+		public JFrame frame = new JFrame();
+		public JDialog dialog = new JDialog(frame, "Loading...", true);
+		public JProgressBar progressBar = new JProgressBar();
+		
+		
+		private boolean doneLoading = false;
+		
+		public void SetDoneLoading(boolean b)
+		{
+			doneLoading = b;
+		}
+		
+		public LoadingSwingWorker(String name)
+		{
+			dialog.setLocation(1000, 500);
+			progressBar.setString("Loading "+ name +"...");
+			progressBar.setStringPainted(true);
+			dialog.getContentPane().add(progressBar);
+			
+		    dialog.pack();
+		    dialog.setModal( false );
+		    dialog.setVisible(true);
+		}
+		
+		int barProgression=0;
+		public void setProgressBar(int i ) 
+		{
+			barProgression=i;
+		}
+		
+		  @Override
+		  protected Integer doInBackground() throws Exception {
+		    
+			  
+			while(!doneLoading)
+			{
+				progressBar.setValue(barProgression);
+				progressBar.update(getGraphics());
+				System.out.println(barProgression);
+				Thread.sleep(200);
+			}
+			
+			  return 1;
+		  }
+		  
+		  @Override
+		  protected void done()
+		  {
+			  FinishItProgrammatically();
+		  }
+		  
+		  public void FinishItProgrammatically()
+		  {
+			 
+			  dialog.setVisible(false);
+		  }
+		}
+	
+		LoadingSwingWorker loadingWorker;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	boolean reSetUp = false;
 	/*
 	 * Erstellt neue Shader-Programme mit neuen Tileheights/widths. Da das im OpenGl-Kontext erfolgen muss, wird hier nur ein boolean geflippt.
@@ -3576,44 +3650,11 @@ public class Main extends JFrame{
 		
 		
 		
-		final JOptionPane loadingPopupPane = new JOptionPane(null,
-                JOptionPane.INFORMATION_MESSAGE,
-                JOptionPane.DEFAULT_OPTION,
-                null,
-                new Object[]{},
-                null);
-		final JDialog loadingDialog = new JDialog();
-		loadingDialog.setTitle("Loading...");
-		loadingDialog.setModal(false);
-		loadingDialog.setContentPane(loadingPopupPane);
-		loadingDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		loadingDialog.pack();
 		
-		Thread loadingPopup = new Thread()
-		{
-			
-			public void run()
-			{
-			
-		        
-				loadingDialog.setVisible(true);
-		        
-		        
-			}
-					
-		};	
-		
-		loadingPopup.start();
 		//Alle Modelle/Objekte vorbereiten
 		setUpModelsAndObjects();
-		try {
-			loadingDialog.setVisible(false);
-			loadingPopup.join();
-			
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		
 
 		//Shader für String-Darstellung als weiße Pixel vorbereiten
         displayStringShader = new ShaderProgram();
@@ -3782,18 +3823,17 @@ public class Main extends JFrame{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		loadingWorker = new LoadingSwingWorker(path + " textures");
+		loadingWorker.execute();
+		int curTextureCount = 0;
+		int allTextureCount = scene.Texturenames.size();
 		for(String s : scene.Texturenames)
 		{
 			if(s != null && s != "")
 			{
-				s = s.replace('\\', '/');
+			s = s.replace('\\', File.separatorChar);
 			System.out.println("trying to load: " + s);
-			if(s.contains("curtain"))
-				{
-				
-				int a = 2;;
-				}
+			
 			scene.Textures.add(TextureLoader.getTexture(
 						new String(s.substring(s.length()-3).toUpperCase()),
 						getClass().getResourceAsStream( s))
@@ -3802,9 +3842,21 @@ public class Main extends JFrame{
 			System.out.println(s + " loaded");
 			}	
 			
+			curTextureCount++;
+			//System.out.println(curTextureCount + " : " + allTextureCount);
+			loadingWorker.setProgressBar((curTextureCount*100)/allTextureCount);
 			
 		}
 		
+		loadingWorker.SetDoneLoading(true);
+		loadingWorker.FinishItProgrammatically();
+		
+		
+		
+		loadingWorker = new LoadingSwingWorker(path + " models");
+		loadingWorker.execute();
+		int curModelCount = 0;
+		int allModelCount = scene.Models.size();
 		for(Model model : scene.Models)
 		{
 			float data[][] = loadData(model,scale);
@@ -3918,8 +3970,9 @@ public class Main extends JFrame{
 			
 			
 			
-			
-			
+			curModelCount++;
+			//System.out.println(curModelCount + " : " + allModelCount);
+			loadingWorker.setProgressBar((curModelCount*100)/allModelCount);
 			
 			
 			
@@ -3929,6 +3982,8 @@ public class Main extends JFrame{
 			
 			
 		}
+		loadingWorker.SetDoneLoading(true);
+		loadingWorker.FinishItProgrammatically();
 		
 		return scene;
 		
