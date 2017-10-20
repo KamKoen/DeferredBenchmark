@@ -489,9 +489,7 @@ public class TiledDeferredPar extends Deferred {
 			computeZ( tileWidth,  tileHeight,defDepthTexture);
 			
 		//	System.out.println(tileWidth);
-			/*
-			 * Scratch that, I'm a moron.
-			*/
+			
 		}
 		
 		ComputeTile.setInt("zCulling", zCulling);
@@ -600,7 +598,7 @@ public class TiledDeferredPar extends Deferred {
 			//first subdivision
 			ComputeTile.setInt("mode", 1);
 			//computeZ( tileWidth,  tileHeight);	
-			
+			ComputeTile.setInt("zCulling", 0);
 			
 			GL43.glDispatchCompute((width / tileWidthSub), (height / tileHeightSub),1);
 			GL42.glMemoryBarrier( GL42.GL_ALL_BARRIER_BITS);
@@ -620,7 +618,7 @@ public class TiledDeferredPar extends Deferred {
 			//read from second subdivision
 			ComputeTile.setInt("mode", 3);
 			
-			
+			ComputeTile.setInt("zCulling", zCulling);
 			
 			
 			
@@ -654,7 +652,7 @@ public class TiledDeferredPar extends Deferred {
 			int tileW = tileTestW0;
 			int tileH = tileTestH0;
 			
-			
+			ComputeTile.setInt("zCulling", 0);
 			//first
 			ComputeTile.setInt("mode", 1);
 			ComputeTile.setInt("tileWidthSub", tileW);
@@ -730,7 +728,7 @@ public class TiledDeferredPar extends Deferred {
 			ComputeTile.setInt("tileWidth", tileW);
 			ComputeTile.setInt("tileHeight", tileH);
 			
-			
+			ComputeTile.setInt("zCulling", zCulling);
 			
 			GL43.glDispatchCompute((width / tileW), (height / tileH),1);
 			GL42.glMemoryBarrier( GL42.GL_ALL_BARRIER_BITS);

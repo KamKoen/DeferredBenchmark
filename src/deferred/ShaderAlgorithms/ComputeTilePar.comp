@@ -1,30 +1,27 @@
 #version 430
 
 
-//
-//Der Shader hier ist sehr gro�, weil hier alle m�glichen Unterteilungen beachtet werden, 
-//und da immer mit anderen Werten gerechnet werden muss, m�sste man entweder mehrere
-//Shader schreiben, oder mit if Abfragen arbeiten
-//
-//
 
-
+//zBuffer
 layout(std430, binding = 1)  buffer zBuf
 {
 	float zB[]; //min max
 };
 
+//speichert offset und Anzahl an Lichtern, um die Lichter des Tiles im indexBuffer zu finden, da sie 
+//pro Tile im anderen Buffer nacheinander auftauchen
 layout(std430, binding = 4)  buffer infB
 {
 	int info[];
 };
-
+//speichert alle Indexe der auftretenden Lichter
 layout(std430, binding = 5)  buffer indB
 {
 	int indexB[];
 };
 
-
+//das Gleiche wie oben, nur betreffend einer anderen Tilegröße
+//nötig für mehrfache Unterteilung
 layout(std430, binding = 6)  buffer infSubB
 {
 	int infoSub[];
@@ -34,7 +31,8 @@ layout(std430, binding = 7)  buffer indSubB
 {
 	int indexSub[];
 };
-
+//das Gleiche wie oben, nur betreffend einer anderen Tilegröße
+//nötig für mehrfache Unterteilung
 layout(std430, binding = 2)  buffer infSubB2
 {
 	int infoSub2[];
@@ -52,13 +50,13 @@ uniform int MAX_LIGHT_PER_TILE;
 uniform int width;
 uniform int height;
 
-uniform int tileWidth;
+uniform int tileWidth;//erste Unterteilung
 uniform int tileHeight;
 
-uniform int tileWidthSub;
+uniform int tileWidthSub; //mögliche zweite Unterteilung
 uniform int tileHeightSub;
 
-uniform int tileWidthSub2;
+uniform int tileWidthSub2; //mögliche zweite Unterteilung
 uniform int tileHeightSub2;
 
 uniform float C;
@@ -130,20 +128,22 @@ float calcViewZ(float z)
 
 
 
-
-
-void createFrustumForTile()
+void createFrustumForTileGeneral(int usedTileWidth, int usedTileHeight, int destBuffer)
 {
+
+	
+	
+	
 	
 	uint cury = gl_WorkGroupID.y;
 	uint curx = gl_WorkGroupID.x;
 	
-	float x = curx * tileWidth;
-	float x2 = x + tileWidth -1;
+	float x = curx * usedTileWidth;
+	float x2 = x + usedTileWidth -1;
 	if(x2 > width-1) x2 = width-1;
 	
-	float y = cury * tileHeight;
-	float y2 = y + tileHeight - 1;
+	float y = cury * usedTileHeight;
+	float y2 = y + usedTileHeight - 1;
 	if(y2 > height-1) y2 = height-1;
 	
 	vec4 frustum[4];
@@ -199,13 +199,12 @@ void createFrustumForTile()
 	
 	
 	
-	int offset = int(cury *( (width/tileWidth) * MAX_LIGHT_PER_TILE) 
+	int offset = int(cury *( (width/usedTileWidth) * MAX_LIGHT_PER_TILE) 
 			+ curx * MAX_LIGHT_PER_TILE);
 	
 	for(int i = 0; i < 4; i++)
 	{
 		int j = i * 256 + int(gl_LocalInvocationID.x);
-		//int j = int(gl_LocalInvocationID.x);
 		if( j > LIGHT_MAX-1) break;
 		
 		if	(
@@ -218,9 +217,10 @@ void createFrustumForTile()
 			)
 			{
 				
-				if(zCulling == 1)
+				if(zCulling == 1 && destBuffer==0)
 				{
-					int offsetZB = int(cury*(width/tileWidth) * 2 + curx * 2);
+					
+					int offsetZB = int(cury*(width/usedTileWidth) * 2 + curx * 2);
 					
 					if	(
 						(view * vec4(pLight[j].position.xyz,1)).z <= (zB[offsetZB] + pLight[j].position.w)&&
@@ -245,7 +245,9 @@ void createFrustumForTile()
 					
 					int tempCount = int(atomicAdd(count,1));
 					barrier();					
-					indexB[offset + tempCount] = j;		
+					if(destBuffer==0)indexB[offset + tempCount] = j;
+					else if(destBuffer==1)indexSub[offset + tempCount] = j;
+					else if(destBuffer==2)indexSub2[offset + tempCount] = j;		
 					
 				
 				}
@@ -261,16 +263,43 @@ void createFrustumForTile()
 	
 	if(count > 0)
 	{
-					 	
-		info[(curx + cury * (width/tileWidth)) * 2] = offset; //offset
-		info[(curx + cury * (width/tileWidth)) * 2 + 1] = int(count); //
+		if(destBuffer==0)
+		{			 	
+			info[(curx + cury * (width/usedTileWidth)) * 2] = offset; //offset
+			info[(curx + cury * (width/usedTileWidth)) * 2 + 1] = int(count); //
+		}
+		else if(destBuffer == 1)
+		{
+			infoSub[(curx + cury * (width/usedTileWidth)) * 2] = offset; //offset
+			infoSub[(curx + cury * (width/usedTileWidth)) * 2 + 1] = int(count); //
+		}
+		else if(destBuffer == 2)
+		{
+			infoSub2[(curx + cury * (width/usedTileWidth)) * 2] = offset; //offset
+			infoSub2[(curx + cury * (width/usedTileWidth)) * 2 + 1] = int(count); //
+		}
 	
 	}
 	
 	else
 	{
-		info[(curx + cury * (width/tileWidth)) * 2] = -1;
-		info[(curx + cury * (width/tileWidth)) * 2 + 1] = -1;
+	
+		if(destBuffer==0)
+		{			 	
+			info[(curx + cury * (width/usedTileWidth)) * 2] = -1;
+			info[(curx + cury * (width/usedTileWidth)) * 2 + 1] = -1;
+		}
+		else if(destBuffer == 1)
+		{
+			infoSub[(curx + cury * (width/usedTileWidth)) * 2] = -1;
+			infoSub[(curx + cury * (width/usedTileWidth)) * 2 + 1] = -1;
+		}
+		else if(destBuffer == 2)
+		{
+			infoSub2[(curx + cury * (width/usedTileWidth)) * 2] = offset; //offset
+			infoSub2[(curx + cury * (width/usedTileWidth)) * 2 + 1] = int(count); //
+		}
+		
 	
 	}
 	
@@ -282,319 +311,73 @@ void createFrustumForTile()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void createFrustumForTileSub1() //mode 1
+void createFrustumForTileSubdivisionAfterFormerDivision(
+				int curSubTileWidth, int curSubTileHeight, 
+				int formerTileWidth, int formerTileHeight, 
+				int sourceBuffer, int destBuffer)
 {
 	
 	uint cury = gl_WorkGroupID.y;
 	uint curx = gl_WorkGroupID.x;
 
-	float x = curx * tileWidthSub;
-	float x2 = x + tileWidthSub -1;
+	float x = curx * curSubTileWidth;
+	float x2 = x + curSubTileWidth - 1;
 	if(x2 > width-1) x2 = width-1;
 	
-	float y = cury * tileHeightSub;
-	float y2 = y + tileHeightSub-1;
-	if(y2 > height-1) y2 = height-1;
-	
-	
-	
-	
-	vec4 frustum[4];
-	vec4 frustumEq[4];
-	
-	frustum[0] = vec4(
-					2.0 * (x / width) - 1.0,
-					2.0 * (y / height) - 1.0,
-					1.0,
-					1.0
-					);
-					
-	frustum[1] = vec4(
-					2.0 * (x2 / width) - 1.0,
-					2.0 * (y / height) - 1.0,
-					1.0,
-					1.0
-					);
-					
-	frustum[2] = vec4(
-					2.0 * (x2 / width) - 1.0,
-					2.0 * (y2 / height) - 1.0,
-					1.0,
-					1.0
-					);
-					
-	frustum[3] = vec4(
-					2.0 * (x / width) - 1.0,
-					2.0 * (y2 / height) - 1.0,
-					1.0,
-					1.0
-					);				
-	
-	
-	for(int i = 0; i < 4; i++)
-	{
-			
-		frustum[i] = invProj * frustum[i];
-		frustum[i] /= frustum[i].w;
-			
-	}
-	
-	
-	frustumEq[0] = createPlaneEq(frustum[0], frustum[1]);
-	frustumEq[1] = createPlaneEq(frustum[1], frustum[2]);
-	frustumEq[2] = createPlaneEq(frustum[2], frustum[3]);
-	frustumEq[3] = createPlaneEq(frustum[3], frustum[0]);
-	
-//	int count = 0;
-	
-	
-	
-	
-	
-	
-	int offset = int(cury *( (width/tileWidthSub) * MAX_LIGHT_PER_TILE) 
-			+ curx * MAX_LIGHT_PER_TILE);
-	
-	for(int i = 0; i < 4; i++)
-	{
-		int j = i * 256 + int(gl_LocalInvocationID.x);
-		//int j = int(gl_LocalInvocationID.x);
-		if( j > LIGHT_MAX-1) break;
-		
-		if	(
-			
-			(getSignedDistance(frustumEq[0], pLight[j].position.xyz) < pLight[j].position.w) &&
-			(getSignedDistance(frustumEq[1], pLight[j].position.xyz) < pLight[j].position.w) &&
-			(getSignedDistance(frustumEq[2], pLight[j].position.xyz) < pLight[j].position.w) &&
-			(getSignedDistance(frustumEq[3], pLight[j].position.xyz) < pLight[j].position.w) 
-			&& ((view * vec4(pLight[j].position.xyz,1)).z <= (0 + pLight[j].position.w))
-			
-			)
-			{
-			
-			
-					
-					int tempCount = int(atomicAdd(count,1));
-					barrier();
-					indexSub[offset + tempCount] = j;
-				
-							
-					
-				
-				
-				
-			
-			
-			}
-		
-		
-		
-	
-	
-	}
-	
-	groupMemoryBarrier();
-	if(count > 0)
-	{
-					 	
-		infoSub[(curx + cury * (width/tileWidthSub)) * 2] = offset; //offset
-		infoSub[(curx + cury * (width/tileWidthSub)) * 2 + 1] = int(count); //
-	
-	}
-	
-	else
-	{
-		infoSub[(curx + cury * (width/tileWidthSub)) * 2] = -1;
-		infoSub[(curx + cury * (width/tileWidthSub)) * 2 + 1] = -1;
-	
-	}
-	
-
-}
-
-
-
-void createFrustumForTileSubWith2()
-{
-	
-	uint cury = gl_WorkGroupID.y;
-	uint curx = gl_WorkGroupID.x;
-
-	float x = curx * tileWidthSub2;
-	float x2 = x + tileWidthSub2-1;
-	if(x2 > width -1) x2 = width -1;
-	
-	float y = cury * tileHeightSub2;
-	float y2 = y + tileHeightSub2-1;
-	if(y2 > height-1) y2 = height-1;
-	
-	
-	
-	
-	vec4 frustum[4];
-	vec4 frustumEq[4];
-	
-	frustum[0] = vec4(
-					2.0 * (x / width) - 1.0,
-					2.0 * (y / height) - 1.0,
-					1.0,
-					1.0
-					);
-					
-	frustum[1] = vec4(
-					2.0 * (x2 / width) - 1.0,
-					2.0 * (y / height) - 1.0,
-					1.0,
-					1.0
-					);
-					
-	frustum[2] = vec4(
-					2.0 * (x2 / width) - 1.0,
-					2.0 * (y2 / height) - 1.0,
-					1.0,
-					1.0
-					);
-					
-	frustum[3] = vec4(
-					2.0 * (x / width) - 1.0,
-					2.0 * (y2 / height) - 1.0,
-					1.0,
-					1.0
-					);				
-	
-	
-	for(int i = 0; i < 4; i++)
-	{
-			
-		frustum[i] = invProj * frustum[i];
-		frustum[i] /= frustum[i].w;
-			
-	}
-	
-	
-	frustumEq[0] = createPlaneEq(frustum[0], frustum[1]);
-	frustumEq[1] = createPlaneEq(frustum[1], frustum[2]);
-	frustumEq[2] = createPlaneEq(frustum[2], frustum[3]);
-	frustumEq[3] = createPlaneEq(frustum[3], frustum[0]);
-	
-	//int count = 0;
-	
-	
-	
-	
-	
-	
-	int offset = int(cury *( (width/tileWidthSub2) * MAX_LIGHT_PER_TILE) 
-			+ curx * MAX_LIGHT_PER_TILE);
-	
-	for(int i = 0; i < 4; i++)
-	{
-		int j = i * 256 + int(gl_LocalInvocationID.x);
-		//int j = int(gl_LocalInvocationID.x);
-		if( j > LIGHT_MAX-1) break;
-		
-		
-		if	(
-			
-			(getSignedDistance(frustumEq[0], pLight[j].position.xyz) < pLight[j].position.w) &&
-			(getSignedDistance(frustumEq[1], pLight[j].position.xyz) < pLight[j].position.w) &&
-			(getSignedDistance(frustumEq[2], pLight[j].position.xyz) < pLight[j].position.w) &&
-			(getSignedDistance(frustumEq[3], pLight[j].position.xyz) < pLight[j].position.w) 
-			&& ((view * vec4(pLight[j].position.xyz,1)).z <= (0 + pLight[j].position.w))
-			)
-			{
-			
-			
-				int tempCount = int(atomicAdd(count,1));
-				barrier();
-				indexSub2[offset + tempCount] = j;
-							
-				
-			}
-		
-		
-		
-	
-	
-	}
-	
-
-	if(count > 0)
-	{
-					 	
-		infoSub2[(curx + cury * (width/tileWidthSub2)) * 2] = offset; //offset
-		infoSub2[(curx + cury * (width/tileWidthSub2)) * 2 + 1] = int(count); //
-	
-	}
-	
-	else
-	{
-		infoSub2[(curx + cury * (width/tileWidthSub2)) * 2] = -1;
-		infoSub2[(curx + cury * (width/tileWidthSub2)) * 2 + 1] = -1;
-	
-	}
-	
-
-}
-
-
-
-
-void createFrustumForTileSub2after1()
-{
-	
-	uint cury = gl_WorkGroupID.y;
-	uint curx = gl_WorkGroupID.x;
-
-	float x = curx * tileWidthSub2;
-	float x2 = x + tileWidthSub2 - 1;
-	if(x2 > width-1) x2 = width-1;
-	
-	float y = cury * tileHeightSub2;
-	float y2 = y + tileHeightSub2 - 1;
+	float y = cury * curSubTileHeight;
+	float y2 = y + curSubTileHeight - 1;
 	if(y2 > height-1) y2 = height-1;
 	
 	
 	
 	//what tile
 	
-	int curySub = int(y2 / tileHeightSub);
-	int curxSub = int(x2 / tileWidthSub);
+	int curySub = int(y2 / formerTileHeight);
+	int curxSub = int(x2 / formerTileWidth);
 	
-	int offsetSub = infoSub[(curxSub + curySub * (width / tileWidthSub)) * 2];
-	int countSub = infoSub[(curxSub + curySub * (width / tileWidthSub)) * 2 + 1];
+	int offsetSub = -1;
+	int countSub = -1;
 	
+	if(sourceBuffer==0)
+	{
+		offsetSub = info[(curxSub + curySub * (width / formerTileWidth)) * 2];
+		countSub = info[(curxSub + curySub * (width / formerTileWidth)) * 2 + 1];
+	}
+	if(sourceBuffer==1)
+	{
+		offsetSub = infoSub[(curxSub + curySub * (width / formerTileWidth)) * 2];
+		countSub = infoSub[(curxSub + curySub * (width / formerTileWidth)) * 2 + 1];
+	}
+	if(sourceBuffer==2)
+	{
+		offsetSub = infoSub2[(curxSub + curySub * (width / formerTileWidth)) * 2];
+		countSub = infoSub2[(curxSub + curySub * (width / formerTileWidth)) * 2 + 1];
+	}
+	
+	
+	
+	
+	
+	
+	
+	//keine Lichter im größeren Tile => keine Lichter im kleinerem Tile
 	if(offsetSub < 0) 
 	{
-			infoSub2[(curx + cury * (width/tileWidthSub2)) * 2] = -1;
-			infoSub2[(curx + cury * (width/tileWidthSub2)) * 2 + 1] = -1;
-	
+		
+		if(destBuffer==1)
+		{
+			infoSub[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
+			infoSub[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+		}
+		
+		if(destBuffer==2)
+		{
+			infoSub2[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
+			infoSub2[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+		}
 	}
+	
+	
 	else 
 	{
 		
@@ -653,7 +436,7 @@ void createFrustumForTileSub2after1()
 		
 		int i = 0;
 		
-		int offset = int(cury *( (width/tileWidthSub2) * MAX_LIGHT_PER_TILE) 
+		int offset = int(cury *( (width/curSubTileWidth) * MAX_LIGHT_PER_TILE) 
 				+ curx * MAX_LIGHT_PER_TILE);
 		
 		for(int j = 0; j < countSub; j++)
@@ -661,7 +444,11 @@ void createFrustumForTileSub2after1()
 		
 			int t = j * 256 + int(gl_LocalInvocationID.x);
 			if(t >= countSub) break;
-			i = indexSub[offsetSub + t];
+			i = 0;
+			
+			if(sourceBuffer == 0) i = indexB[offsetSub + t]; 
+			else if(sourceBuffer == 1) i = indexSub[offsetSub + t]; 
+			else if(sourceBuffer == 2) i = indexSub2[offsetSub + t];  
 			
 			
 			
@@ -673,318 +460,10 @@ void createFrustumForTileSub2after1()
 				(getSignedDistance(frustumEq[3], pLight[i].position.xyz) < pLight[i].position.w)  
 				&& ((view * vec4(pLight[i].position.xyz,1)).z <= (0 + pLight[i].position.w))
 				)
+				
+				if(zCulling == 1 )
 				{
-					int tempCount = int(atomicAdd(count,1));
-					barrier();
-					indexSub2[offset + tempCount] = i;		
-					
-					
-				}
-			
-			
-			
-		
-		
-		}
-		
-	
-		if(count > 0)
-		{
-						 	
-			infoSub2[(curx + cury * (width/tileWidthSub2)) * 2] = offset; //offset
-			infoSub2[(curx + cury * (width/tileWidthSub2)) * 2 + 1] = int(count); //
-		
-		}
-		
-		else
-		{
-			infoSub2[(curx + cury * (width/tileWidthSub2)) * 2] = -1;
-			infoSub2[(curx + cury * (width/tileWidthSub2)) * 2 + 1] = -1;
-		
-		}
-	}
-
-}
-
-
-
-
-
-
-void createFrustumForTileFromSub2()
-{
-	
-	uint cury = gl_WorkGroupID.y;
-	uint curx = gl_WorkGroupID.x;
-
-	float x = curx * tileWidth;
-	float x2 = x + tileWidth-1;
-	if(x2 > width-1) x2 = width-1;
-	
-	float y = cury * tileHeight;
-	float y2 = y + tileHeight-1;
-	if(y2 > height-1) y2 = height-1;
-	
-	
-	
-	//what tile
-	
-	int curySub = int(y2 / tileHeightSub2);
-	int curxSub = int(x2 / tileWidthSub2);
-	
-	int offsetSub = infoSub2[(curxSub + curySub * (width / tileWidthSub2)) * 2];
-	int countSub = infoSub2[(curxSub + curySub * (width / tileWidthSub2)) * 2 + 1];
-	
-	if(offsetSub < 0) 
-	{
-			info[(curx + cury * (width/tileWidth)) * 2] = -1;
-			info[(curx + cury * (width/tileWidth)) * 2 + 1] = -1;
-	
-	}
-	else 
-	{
-		
-		
-		
-		vec4 frustum[4];
-		vec4 frustumEq[4];
-		
-		frustum[0] = vec4(
-						2.0 * (x / width) - 1.0,
-						2.0 * (y / height) - 1.0,
-						1.0,
-						1.0
-						);
-						
-		frustum[1] = vec4(
-						2.0 * (x2 / width) - 1.0,
-						2.0 * (y / height) - 1.0,
-						1.0,
-						1.0
-						);
-						
-		frustum[2] = vec4(
-						2.0 * (x2 / width) - 1.0,
-						2.0 * (y2 / height) - 1.0,
-						1.0,
-						1.0
-						);
-						
-		frustum[3] = vec4(
-						2.0 * (x / width) - 1.0,
-						2.0 * (y2 / height) - 1.0,
-						1.0,
-						1.0
-						);				
-		
-		
-		for(int i = 0; i < 4; i++)
-		{
-				
-			frustum[i] = invProj * frustum[i];
-			frustum[i] /= frustum[i].w;
-				
-		}
-		
-		
-		frustumEq[0] = createPlaneEq(frustum[0], frustum[1]);
-		frustumEq[1] = createPlaneEq(frustum[1], frustum[2]);
-		frustumEq[2] = createPlaneEq(frustum[2], frustum[3]);
-		frustumEq[3] = createPlaneEq(frustum[3], frustum[0]);
-		
-		//int count = 0;
-		
-		
-		
-		
-		int i = 0;
-		
-		int offset = int(cury *( (width/tileWidth) * MAX_LIGHT_PER_TILE) 
-				+ curx * MAX_LIGHT_PER_TILE);
-		
-		for(int j = 0; j < countSub; j++)
-		{
-		
-			int t = j * 256 + int(gl_LocalInvocationID.x);
-			if(t >= countSub) break;
-			i = indexSub2[offsetSub + t];
-			
-			
-			
-			if	(
-				
-				(getSignedDistance(frustumEq[0], pLight[i].position.xyz) < pLight[i].position.w) &&
-				(getSignedDistance(frustumEq[1], pLight[i].position.xyz) < pLight[i].position.w) &&
-				(getSignedDistance(frustumEq[2], pLight[i].position.xyz) < pLight[i].position.w) &&
-				(getSignedDistance(frustumEq[3], pLight[i].position.xyz) < pLight[i].position.w) 
-				&& ((view * vec4(pLight[i].position.xyz,1)).z <= (0 + pLight[i].position.w))
-				)
-				if(zCulling == 1)
-				{
-					int offsetZB = int(cury*(width/tileWidth) * 2 + curx * 2);
-					
-					if	(
-						(view * vec4(pLight[i].position.xyz,1)).z <= (zB[offsetZB] + pLight[i].position.w)&&
-						(view * vec4(pLight[i].position.xyz,1)).z >= (zB[offsetZB+1] - pLight[i].position.w)
-						)
-					{
-						int tempCount = int(atomicAdd(count,1));
-						barrier();
-						indexB[offset + tempCount] = i;
-					
-					}
-					
-				
-				
-				}
-				else
-				{
-				
-							
-					int tempCount = int(atomicAdd(count,1));
-						barrier();
-						indexB[offset + tempCount] = i;		
-				
-				
-				}
-			
-			
-			
-		
-		
-		}
-		
-	
-		if(count > 0)
-		{
-						 	
-			info[(curx + cury * (width/tileWidth)) * 2] = offset; //offset
-			info[(curx + cury * (width/tileWidth)) * 2 + 1] = int(count); //
-		
-		}
-		
-		else
-		{
-			info[(curx + cury * (width/tileWidth)) * 2] = -1;
-			info[(curx + cury * (width/tileWidth)) * 2 + 1] = -1;
-		
-		}
-	}
-
-}
-
-
-
-void createFrustumForTileFromSub1()
-{
-	
-	int cury = int(gl_WorkGroupID.y);
-	int curx = int(gl_WorkGroupID.x);
-
-	float x = curx * tileWidth ;
-	float x2 = x + tileWidth-1;
-	if(x2 > width-1) x2 = width-1;
-	
-	float y = cury * tileHeight  ;
-	float y2 = y + tileHeight-1;
-	if(y2 > height-1) y2 = height-1;
-	
-	
-	
-	//what tile
-	
-	int curySub = int((y2) / tileHeightSub); 
-	int curxSub = int((x2) / tileWidthSub);
-	
-	int offsetSub = infoSub[(curxSub + curySub * (width / tileWidthSub)) * 2];
-	int countSub = infoSub[(curxSub + curySub * (width / tileWidthSub)) * 2 + 1];
-	
-	
-	if(offsetSub < 0) 
-	{
-			info[(curx + cury * (width/tileWidth)) * 2] = -1;
-			info[(curx + cury * (width/tileWidth)) * 2 + 1] = -1;
-	
-	}
-	else 
-	{
-		
-		
-		
-		vec4 frustum[4];
-		vec4 frustumEq[4];
-		
-		frustum[0] = vec4(
-						2.0 * (x / width) - 1.0,
-						2.0 * (y / height) - 1.0,
-						1.0,
-						1.0
-						);
-						
-		frustum[1] = vec4(
-						2.0 * (x2 / width) - 1.0,
-						2.0 * (y / height) - 1.0,
-						1.0,
-						1.0
-						);
-						
-		frustum[2] = vec4(
-						2.0 * (x2 / width) - 1.0,
-						2.0 * (y2 / height) - 1.0,
-						1.0,
-						1.0
-						);
-						
-		frustum[3] = vec4(
-						2.0 * (x / width) - 1.0,
-						2.0 * (y2 / height) - 1.0,
-						1.0,
-						1.0
-						);				
-		
-		
-		for(int i = 0; i < 4; i++)
-		{
-				
-			frustum[i] = invProj * frustum[i];
-			frustum[i] /= frustum[i].w;
-				
-		}
-		
-		
-		frustumEq[0] = createPlaneEq(frustum[0], frustum[1]);
-		frustumEq[1] = createPlaneEq(frustum[1], frustum[2]);
-		frustumEq[2] = createPlaneEq(frustum[2], frustum[3]);
-		frustumEq[3] = createPlaneEq(frustum[3], frustum[0]);
-		
-	//	int count = 0;
-		
-		
-		
-		
-		int i = 0;
-		
-		int offset = cury *( (width/tileWidth) * MAX_LIGHT_PER_TILE) 
-				+ curx * MAX_LIGHT_PER_TILE;
-		
-		for(int j = 0; j < 4; j++)
-		{
-			int t = j * 256 + int(gl_LocalInvocationID.x);
-			if(t >= countSub) break;
-			i = indexSub[offsetSub + t];
-			
-			
-			if	(
-				
-				(getSignedDistance(frustumEq[0], pLight[i].position.xyz) < pLight[i].position.w) &&
-				(getSignedDistance(frustumEq[1], pLight[i].position.xyz) < pLight[i].position.w) &&
-				(getSignedDistance(frustumEq[2], pLight[i].position.xyz) < pLight[i].position.w) &&
-				(getSignedDistance(frustumEq[3], pLight[i].position.xyz) < pLight[i].position.w) 
-				&& ((view * vec4(pLight[i].position.xyz,1)).z <= (0 + pLight[i].position.w))
-				)
-				if(zCulling == 1)
-				{
-					int offsetZB = int(cury*(width/tileWidth) * 2 + curx * 2);
+					int offsetZB = int(cury*(width/curSubTileWidth) * 2 + curx * 2);
 					
 					if	(
 						(view * vec4(pLight[i].position.xyz,1)).z <= (zB[offsetZB] + pLight[i].position.w)&&
@@ -994,7 +473,9 @@ void createFrustumForTileFromSub1()
 						
 						int tempCount = int(atomicAdd(count,1));
 						barrier();
-						indexB[offset + tempCount] = i;
+						if(destBuffer == 0) indexB[offset + tempCount] = i;
+						else if(destBuffer == 1) indexSub[offset + tempCount] = i;
+						else if(destBuffer == 2) indexSub2[offset + tempCount] = i;
 						
 					
 					}
@@ -1005,14 +486,13 @@ void createFrustumForTileFromSub1()
 				else
 				{
 				
-							
-					
 					int tempCount = int(atomicAdd(count,1));
 					barrier();
-					indexB[offset + tempCount] = i;
-						
-				
-				
+					if(destBuffer==0)indexB[offset + tempCount] = i;
+					else if(destBuffer==1)indexSub[offset + tempCount] = i;		
+					else if(destBuffer==2)indexSub2[offset + tempCount] = i;		
+					
+					
 				}
 			
 			
@@ -1021,41 +501,49 @@ void createFrustumForTileFromSub1()
 		
 		}
 		
-		groupMemoryBarrier();
 	
 		if(count > 0)
 		{
-						 	
-			info[(curx + cury * (width/tileWidth)) * 2] = offset; //offset
-			info[(curx + cury * (width/tileWidth)) * 2 + 1] = int(count); //
 		
+			if(destBuffer==0)
+			{				 	
+				info[(curx + cury * (width/curSubTileWidth)) * 2] = offset; //offset
+				info[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = int(count); //
+			}
+		
+			else if(destBuffer==1)
+			{				 	
+				infoSub[(curx + cury * (width/curSubTileWidth)) * 2] = offset; //offset
+				infoSub[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = int(count); //
+			}
+			else if(destBuffer==2)
+			{				 	
+				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2] = offset; //offset
+				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = int(count); //
+			}
 		}
 		
 		else
 		{
-			info[(curx + cury * (width/tileWidth)) * 2] = -1;
-			info[(curx + cury * (width/tileWidth)) * 2 + 1] = -1;
-		
+			if(destBuffer==0)
+			{		
+				info[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
+				info[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+			}
+			else if(destBuffer==1)
+			{		
+				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
+				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+			}
+			else if(destBuffer == 2)
+			{	
+				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
+				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+			}
 		}
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 void main()
@@ -1068,7 +556,9 @@ void main()
 
 	if(mode == 0)
 	{
-		createFrustumForTile();
+		
+		createFrustumForTileGeneral(tileWidth, tileHeight,0);
+		
 	}
 	
 	
@@ -1078,19 +568,23 @@ void main()
 	//first subdivision
 	else if (mode == 1)
 	{
-		createFrustumForTileSub1();
+		createFrustumForTileGeneral(tileWidthSub, tileHeightSub,1);
+				
 	}
 	
 	
 	//second subdivision after first
 	else if (mode == 2)
 	{
-		createFrustumForTileSub2after1();
+		createFrustumForTileSubdivisionAfterFormerDivision(
+		tileWidthSub2, tileHeightSub2, tileWidthSub, tileHeightSub, 1,2);
 	}
 	//read from second subdivision
 	else if (mode == 3)
 	{
-		createFrustumForTileFromSub2();
+		
+		createFrustumForTileSubdivisionAfterFormerDivision(
+		tileWidth, tileHeight, tileWidthSub2, tileHeightSub2, 2,0);
 	}
 	
 	
@@ -1100,14 +594,17 @@ void main()
 	else if (mode == 4)
 	{
 	
-	    createFrustumForTileFromSub1();
+	   
+	    createFrustumForTileSubdivisionAfterFormerDivision(
+		tileWidth, tileHeight, tileWidthSub, tileHeightSub, 1,0);
 	
 	}
 	
 	//first subdivision with second's width/height
 	else if (mode == 5)
 	{
-		createFrustumForTileSubWith2();
+		
+		createFrustumForTileGeneral(tileWidthSub2, tileHeightSub2,2);
 	}
 	
 	
