@@ -138,6 +138,8 @@ void createFrustumForTileGeneral(int usedTileWidth, int usedTileHeight, int dest
 	uint cury = gl_WorkGroupID.y;
 	uint curx = gl_WorkGroupID.x;
 	
+	int tileColumn = width/usedTileWidth;
+	
 	float x = curx * usedTileWidth;
 	float x2 = x + usedTileWidth -1;
 	if(x2 > width-1) x2 = width-1;
@@ -199,7 +201,7 @@ void createFrustumForTileGeneral(int usedTileWidth, int usedTileHeight, int dest
 	
 	
 	
-	int offset = int(cury *( (width/usedTileWidth) * MAX_LIGHT_PER_TILE) 
+	int offset = int(cury *( (tileColumn) * MAX_LIGHT_PER_TILE) 
 			+ curx * MAX_LIGHT_PER_TILE);
 	
 	for(int i = 0; i < 4; i++)
@@ -220,7 +222,7 @@ void createFrustumForTileGeneral(int usedTileWidth, int usedTileHeight, int dest
 				if(zCulling == 1 && destBuffer==0)
 				{
 					
-					int offsetZB = int(cury*(width/usedTileWidth) * 2 + curx * 2);
+					int offsetZB = int(cury*(tileColumn) * 2 + curx * 2);
 					
 					if	(
 						(view * vec4(pLight[j].position.xyz,1)).z <= (zB[offsetZB] + pLight[j].position.w)&&
@@ -265,18 +267,18 @@ void createFrustumForTileGeneral(int usedTileWidth, int usedTileHeight, int dest
 	{
 		if(destBuffer==0)
 		{			 	
-			info[(curx + cury * (width/usedTileWidth)) * 2] = offset; //offset
-			info[(curx + cury * (width/usedTileWidth)) * 2 + 1] = int(count); //
+			info[(curx + cury * (tileColumn)) * 2] = offset; //offset
+			info[(curx + cury * (tileColumn)) * 2 + 1] = int(count); //
 		}
 		else if(destBuffer == 1)
 		{
-			infoSub[(curx + cury * (width/usedTileWidth)) * 2] = offset; //offset
-			infoSub[(curx + cury * (width/usedTileWidth)) * 2 + 1] = int(count); //
+			infoSub[(curx + cury * (tileColumn)) * 2] = offset; //offset
+			infoSub[(curx + cury * (tileColumn)) * 2 + 1] = int(count); //
 		}
 		else if(destBuffer == 2)
 		{
-			infoSub2[(curx + cury * (width/usedTileWidth)) * 2] = offset; //offset
-			infoSub2[(curx + cury * (width/usedTileWidth)) * 2 + 1] = int(count); //
+			infoSub2[(curx + cury * (tileColumn)) * 2] = offset; //offset
+			infoSub2[(curx + cury * (tileColumn)) * 2 + 1] = int(count); //
 		}
 	
 	}
@@ -286,18 +288,18 @@ void createFrustumForTileGeneral(int usedTileWidth, int usedTileHeight, int dest
 	
 		if(destBuffer==0)
 		{			 	
-			info[(curx + cury * (width/usedTileWidth)) * 2] = -1;
-			info[(curx + cury * (width/usedTileWidth)) * 2 + 1] = -1;
+			info[(curx + cury * (tileColumn)) * 2] = -1;
+			info[(curx + cury * (tileColumn)) * 2 + 1] = -1;
 		}
 		else if(destBuffer == 1)
 		{
-			infoSub[(curx + cury * (width/usedTileWidth)) * 2] = -1;
-			infoSub[(curx + cury * (width/usedTileWidth)) * 2 + 1] = -1;
+			infoSub[(curx + cury * (tileColumn)) * 2] = -1;
+			infoSub[(curx + cury * (tileColumn)) * 2 + 1] = -1;
 		}
 		else if(destBuffer == 2)
 		{
-			infoSub2[(curx + cury * (width/usedTileWidth)) * 2] = offset; //offset
-			infoSub2[(curx + cury * (width/usedTileWidth)) * 2 + 1] = int(count); //
+			infoSub2[(curx + cury * (tileColumn)) * 2] = offset; //offset
+			infoSub2[(curx + cury * (tileColumn)) * 2 + 1] = int(count); //
 		}
 		
 	
@@ -319,6 +321,10 @@ void createFrustumForTileSubdivisionAfterFormerDivision(
 	
 	uint cury = gl_WorkGroupID.y;
 	uint curx = gl_WorkGroupID.x;
+	
+	int formerTileColumn = width / formerTileWidth;
+	
+	int subTileColumn = width/curSubTileWidth;
 
 	float x = curx * curSubTileWidth;
 	float x2 = x + curSubTileWidth - 1;
@@ -340,18 +346,18 @@ void createFrustumForTileSubdivisionAfterFormerDivision(
 	
 	if(sourceBuffer==0)
 	{
-		offsetSub = info[(curxSub + curySub * (width / formerTileWidth)) * 2];
-		countSub = info[(curxSub + curySub * (width / formerTileWidth)) * 2 + 1];
+		offsetSub = info[(curxSub + curySub * (formerTileColumn)) * 2];
+		countSub = info[(curxSub + curySub * (formerTileColumn)) * 2 + 1];
 	}
 	if(sourceBuffer==1)
 	{
-		offsetSub = infoSub[(curxSub + curySub * (width / formerTileWidth)) * 2];
-		countSub = infoSub[(curxSub + curySub * (width / formerTileWidth)) * 2 + 1];
+		offsetSub = infoSub[(curxSub + curySub * (formerTileColumn)) * 2];
+		countSub = infoSub[(curxSub + curySub * (formerTileColumn)) * 2 + 1];
 	}
 	if(sourceBuffer==2)
 	{
-		offsetSub = infoSub2[(curxSub + curySub * (width / formerTileWidth)) * 2];
-		countSub = infoSub2[(curxSub + curySub * (width / formerTileWidth)) * 2 + 1];
+		offsetSub = infoSub2[(curxSub + curySub * (formerTileColumn)) * 2];
+		countSub = infoSub2[(curxSub + curySub * (formerTileColumn)) * 2 + 1];
 	}
 	
 	
@@ -366,14 +372,14 @@ void createFrustumForTileSubdivisionAfterFormerDivision(
 		
 		if(destBuffer==1)
 		{
-			infoSub[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
-			infoSub[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+			infoSub[(curx + cury * (subTileColumn)) * 2] = -1;
+			infoSub[(curx + cury * (subTileColumn)) * 2 + 1] = -1;
 		}
 		
 		if(destBuffer==2)
 		{
-			infoSub2[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
-			infoSub2[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+			infoSub2[(curx + cury * (subTileColumn)) * 2] = -1;
+			infoSub2[(curx + cury * (subTileColumn)) * 2 + 1] = -1;
 		}
 	}
 	
@@ -436,7 +442,7 @@ void createFrustumForTileSubdivisionAfterFormerDivision(
 		
 		int i = 0;
 		
-		int offset = int(cury *( (width/curSubTileWidth) * MAX_LIGHT_PER_TILE) 
+		int offset = int(cury *( (subTileColumn) * MAX_LIGHT_PER_TILE) 
 				+ curx * MAX_LIGHT_PER_TILE);
 		
 		for(int j = 0; j < countSub; j++)
@@ -463,7 +469,7 @@ void createFrustumForTileSubdivisionAfterFormerDivision(
 				
 				if(zCulling == 1 )
 				{
-					int offsetZB = int(cury*(width/curSubTileWidth) * 2 + curx * 2);
+					int offsetZB = int(cury*(subTileColumn) * 2 + curx * 2);
 					
 					if	(
 						(view * vec4(pLight[i].position.xyz,1)).z <= (zB[offsetZB] + pLight[i].position.w)&&
@@ -507,19 +513,19 @@ void createFrustumForTileSubdivisionAfterFormerDivision(
 		
 			if(destBuffer==0)
 			{				 	
-				info[(curx + cury * (width/curSubTileWidth)) * 2] = offset; //offset
-				info[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = int(count); //
+				info[(curx + cury * (subTileColumn)) * 2] = offset; //offset
+				info[(curx + cury * (subTileColumn)) * 2 + 1] = int(count); //
 			}
 		
 			else if(destBuffer==1)
 			{				 	
-				infoSub[(curx + cury * (width/curSubTileWidth)) * 2] = offset; //offset
-				infoSub[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = int(count); //
+				infoSub[(curx + cury * (subTileColumn)) * 2] = offset; //offset
+				infoSub[(curx + cury * (subTileColumn)) * 2 + 1] = int(count); //
 			}
 			else if(destBuffer==2)
 			{				 	
-				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2] = offset; //offset
-				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = int(count); //
+				infoSub2[(curx + cury * (subTileColumn)) * 2] = offset; //offset
+				infoSub2[(curx + cury * (subTileColumn)) * 2 + 1] = int(count); //
 			}
 		}
 		
@@ -527,18 +533,18 @@ void createFrustumForTileSubdivisionAfterFormerDivision(
 		{
 			if(destBuffer==0)
 			{		
-				info[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
-				info[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+				info[(curx + cury * (subTileColumn)) * 2] = -1;
+				info[(curx + cury * (subTileColumn)) * 2 + 1] = -1;
 			}
 			else if(destBuffer==1)
 			{		
-				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
-				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+				infoSub2[(curx + cury * (subTileColumn)) * 2] = -1;
+				infoSub2[(curx + cury * (subTileColumn)) * 2 + 1] = -1;
 			}
 			else if(destBuffer == 2)
 			{	
-				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2] = -1;
-				infoSub2[(curx + cury * (width/curSubTileWidth)) * 2 + 1] = -1;
+				infoSub2[(curx + cury * (subTileColumn)) * 2] = -1;
+				infoSub2[(curx + cury * (subTileColumn)) * 2 + 1] = -1;
 			}
 		}
 	}
